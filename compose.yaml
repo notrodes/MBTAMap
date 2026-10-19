@@ -1,0 +1,37 @@
+services:
+  app:
+    image: notrodes/mbtamap:latest
+    restart: unless-stopped
+    expose:
+      - "3000"
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on:
+      - app
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      DOMAIN: segfaulty.dev
+    volumes:
+      # :Z relabels the file for SELinux (CentOS/RHEL/Podman); no-op elsewhere
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro,Z
+      # Persist certificates so Let's Encrypt isn't hit on every restart
+      - caddy_data:/data
+      - caddy_config:/config
+
+# The host is IPv6-only, so containers need IPv6 for outbound traffic
+# (e.g. Caddy reaching Let's Encrypt). Docker NATs this ULA subnet via the host.
+networks:
+  default:
+    enable_ipv6: true
+    ipam:
+      config:
+        - subnet: fd00:cafe::/64
+
+volumes:
+  caddy_data:
+  caddy_config:

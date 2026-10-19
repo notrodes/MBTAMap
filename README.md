@@ -55,6 +55,18 @@ docker build -t my-app .
 docker run -p 3000:3000 my-app
 ```
 
+### HTTPS with Docker Compose
+
+`compose.yaml` runs the app behind [Caddy](https://caddyserver.com), which terminates TLS and automatically obtains/renews Let's Encrypt certificates.
+
+```bash
+# Local testing (self-signed cert for https://localhost)
+docker compose up -d --build
+
+# Production: DNS for your domain must point at this server, and ports 80/443 must be open
+DOMAIN=mbta.example.com docker compose up -d --build
+```
+
 The containerized application can be deployed to any platform that supports Docker, including:
 
 - AWS ECS
